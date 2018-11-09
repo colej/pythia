@@ -3,23 +3,24 @@ from numpy import cos,sin,pi
 
 from scargle_engine import scar2,scar3
 
-def normalize_distribution(s1):
+def normalise_distribution(s1):
     s1_var = np.var(s1)
     yield s1/s1_var
 
-def normalize_amplitude(s1,norm_factor):
+def normalise_amplitude(s1,norm_factor):
     yield np.sqrt(s1) * norm_factor
 
-def normalize_power_density(s1,norm_factor):
-    yield s1 * norm_factor**2 /
+def normalise_power_density(s1,norm_factor,T):
+    yield s1 * norm_factor**2 * T
 
 
 
 def scargle(times, signal, f0=None, fn=None, df=None, norm='amplitude',
-            weights=None, single=False):
+            weights=None):
     """
     Scargle periodogram of Scargle (1982).
 
+    # TODO: Update normalisation options
     Several options are available (possibly combined):
         1. weighted Scargle
         2. Amplitude spectrum
@@ -42,6 +43,9 @@ def scargle(times, signal, f0=None, fn=None, df=None, norm='amplitude',
     by the 'effective length of the observing run', which is calculated as the
     reciprocal of the area under spectral window (in power, and take 2*Nyquist
     as upper frequency value).
+
+    As of 09/11/2018, this routine has been stripped and updated to work in python 2.7
+    and python 3.6. Additionally, the routines are updated to function as generators.
 
     REMARK: this routine does B{not} automatically remove the average. It is the
     user's responsibility to do this adequately: e.g. subtract a B{weighted}
@@ -91,9 +95,11 @@ def scargle(times, signal, f0=None, fn=None, df=None, norm='amplitude',
     norm_factor  = np.sqrt(4./N)
 
     if norm =='distribution': # statistical distribution
-        s1_normed = list(normalize_distribution(s1))
+        s1_normed = list(normalise_distribution(s1))
     elif norm == "amplitude": # amplitude spectrum
-        s1_normed = list(normalize_amplitude(s1,norm_factor))
+        s1_normed = list(normalise_amplitude(s1,norm_factor))
     elif norm == "density": # power density
-        s1_normed = list(normalize_power_density(s1,norm_factor,T))
-    yield f1,s1s1_normed
+        s1_normed = list(normalise_power_density(s1,norm_factor,T))
+
+    yield f1
+    yield s1_normed
