@@ -1,12 +1,20 @@
 import numpy as np
 from numpy import cos,sin,pi
-from scipy.special import jn
-from ivs.aux.decorators import make_parallel
-from ivs.aux import loggers
-from ivs.aux import termtools
-from ivs.timeseries.decorators import parallel_pergram,defaults_pergram,getNyquist
 
-@make_parallel
+from scargle_engine import scar2,scar3
+
+def normalize_distribution(s1):
+    s1_var = np.var(s1)
+    yield s1/s1_var
+
+def normalize_amplitude(s1,norm_factor):
+    yield np.sqrt(s1) * norm_factor
+
+def normalize_power_density(s1,norm_factor):
+    yield s1 * norm_factor**2 /
+
+
+
 def scargle(times, signal, f0=None, fn=None, df=None, norm='amplitude',
             weights=None, single=False):
     """
@@ -56,31 +64,36 @@ def scargle(times, signal, f0=None, fn=None, df=None, norm='amplitude',
     @return: frequencies, amplitude spectrum
     @rtype: array,array
     """
-    if single: pyscargle_ = pyscargle_single
-    else:
-        pyscargle_ = pyscargle
+
     #-- initialize variables for use in Fortran routine
-    sigma=0.;xgem=0.;xvar=0.;n=len(times)
+    sigma=0.
+    xgem=0.
+    xvar=0.
+    N=len(times)
     T = times.ptp()
     nf=int((fn-f0)/df+0.001)+1
-    f1=np.zeros(nf,'d');s1=np.zeros(nf,'d')
-    ss=np.zeros(nf,'d');sc=np.zeros(nf,'d');ss2=np.zeros(nf,'d');sc2=np.zeros(nf,'d')
+    f1=np.zeros(nf,'d')
+    s1=np.zeros(nf,'d')
+    ss=np.zeros(nf,'d')
+    sc=np.zeros(nf,'d')
+    ss2=np.zeros(nf,'d')
+    sc2=np.zeros(nf,'d')
 
     #-- run the Fortran routine
     if weights is None:
-        f1,s1=pyscargle_.scar2(signal,times,f0,df,f1,s1,ss,sc,ss2,sc2)
+        f1,s1=scar2(signal,times,f0,df,f1,s1,ss,sc,ss2,sc2)
     else:
         w=np.array(weights,'float')
-        logger.debug('Weighed scargle')
-        f1,s1=pyscargle_.scar3(signal,times,f0,df,f1,s1,ss,sc,ss2,sc2,w)
+        f1,s1 = scar3(signal,times,f0,df,f1,s1,ss,sc,ss2,sc2,w)
 
     #-- search for peaks/frequencies/amplitudes
     if not s1[0]: s1[0]=0. # it is possible that the first amplitude is a none-variable
-    fact  = np.sqrt(4./n)
+    norm_factor  = np.sqrt(4./N)
+
     if norm =='distribution': # statistical distribution
-        s1 /= np.var(signal)
+        s1_normed = list(normalize_distribution(s1))
     elif norm == "amplitude": # amplitude spectrum
-        s1 = fact * np.sqrt(s1)
+        s1_normed = list(normalize_amplitude(s1,norm_factor))
     elif norm == "density": # power density
-        s1 = fact**2 * s1 * T
-    return f1, s1
+        s1_normed = list(normalize_power_density(s1,norm_factor,T))
+    yield f1,s1s1_normed
