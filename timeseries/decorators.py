@@ -35,13 +35,6 @@ def defaults_periodogram(fctn):
         kwargs['df'] = df
         kwargs['fn'] = fn
 
-        #-- normalise weights if they are given
-        weights = kwargs.get('weights',None)
-        if weights is not None:
-            if weights.sum() != len(weights):
-                weights = weights / float(weights.sum()) * len(weights)
-                logger.debug("Weights were initially not normalized: normalization performed.")
-                kwargs['weights'] = weights
         return fctn(times,signal,*args[2:],**kwargs)
 
     return globpar
