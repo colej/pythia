@@ -46,7 +46,7 @@
     real(8) :: a_df,s_df,c_df,s2_df,c2_df
     real(8) :: a,y_i
     real(8) :: s_f0_yi, c_f0_yi, c_f0_yi_last, c2_f0_yi_last
-    real(8) :: sck_sq, ssk_sq, sck2_sq, ssk2_sq
+    real(8) :: sci_sq, ssi_sq, sc2i_sq, ss2i_sq
     integer :: i,j
 
 
@@ -100,14 +100,14 @@
     enddo
 
     do i=1,nf
-      ssk_sq = ss(i)*ss(i)
-      ss2k_sq = ss2(i)*ss2(i)
-      sck_sq = sc(i)*sc(i)
-      sc2k_sq = sc2(i)*sc2(i)
+      ssi_sq = ss(i)*ss(i)
+      ss2i_sq = ss2(i)*ss2(i)
+      sci_sq = sc(i)*sc(i)
+      sc2i_sq = sc2(i)*sc2(i)
 
       f1(i) = f
-      s1(i) = ( sck_sq*(dp_n-sc2(i)) + ssk_sq*(dp_n+sc2(i)) - &
-                dtwo*ss(i)*sc(i)*ss2(i))/(dp_nsq-sc2k_sq-ss2k_sq)
+      s1(i) = ( sci_sq*(dp_n-sc2(i)) + ssi_sq*(dp_n+sc2(i)) - &
+                dtwo*ss(i)*sc(i)*ss2(i))/(dp_nsq-sc2i_sq-ss2i_sq)
       f = f+df
     enddo
 
