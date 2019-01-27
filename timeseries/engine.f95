@@ -55,7 +55,6 @@
     twopi_df = twopi * df
     dp_n = DFLOAT(n)
     dp_nsq = dp_n*dp_n
-    print *,dp_nsq
 
     do i=1,nf
       ss(i) = dnul
@@ -110,7 +109,6 @@
       s1(i) = ( sck_sq*(dp_n-sc2(i)) + ssk_sq*(dp_n+sc2(i)) - &
                 dtwo*ss(i)*sc(i)*ss2(i))/(dp_nsq-sc2k_sq-ss2k_sq)
       f = f+df
-      print *,s1(i)
     enddo
 
     RETURN
