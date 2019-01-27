@@ -3,7 +3,7 @@
 !-----------------------------------------------------------
 !--------- F95/03/08 re-write of unweighted scargle by -----
 !--------- Cuypers / Aerts / De Cat / Degroote -------------
-!--------- Modified by Johnston ----------------------------
+!--------- Modified by C. Johnston and D. Bowman -----------
 !-----------------------------------------------------------
 
     subroutine scargle (x,y,f0,df,f1,s1,n,nf)

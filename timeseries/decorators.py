@@ -1,4 +1,6 @@
 """
+Original author: P. Degroote
+Adapted by: C. Johnston
 Various decorator functions for time series analysis
     - Parallel periodogram
     - Autocompletion of default arguments
