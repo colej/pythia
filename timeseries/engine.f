@@ -1,5 +1,5 @@
 C FILE: ENGINE_OLD.F
-      SUBROUTINE SCAR2 (N,X,T,F0,NF,DF,F1,S1,SS,SC,SS2,SC2)
+      SUBROUTINE SCAR2 (N,T,X,F0,NF,DF,F1,S1,SS,SC,SS2,SC2)
 
 C     Computation of Scargles periodogram without explicit tau
 C     calculation, with iteration (Method Cuypers)
