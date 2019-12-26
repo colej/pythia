@@ -79,7 +79,6 @@ def scargle(times, signal, f0=None, fn=None, df=None, norm='amplitude'):
     nf=int((fn-f0)/df+0.001)+1
     f1=np.zeros(nf,'d')
     s1=np.zeros(nf,'d')
-    # print('Call Scargle')
 
     #-- run the Fortran routine
     f1,s1 = fscargle(times,signal,f0,df,f1,s1)
