@@ -1,0 +1,13 @@
+# Compiled source
+
+*.pyc
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.~
+
+
+__pycache__/
+timeseries/__pycache__/
