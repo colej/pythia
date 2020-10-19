@@ -1,7 +1,222 @@
-import import numpy as np
-from numpy import cos,sin,pi
+import numpy as np
+import pymc3 as pm
+import exoplanet as xo
+import theano.tensor as tt
+import matplotlib.pyplot as plt
 
-from pythia.timeseries.pergrams import scargle
+from progress.bar import Bar
+from pythia.timeseries.periodograms import scargle
+from pythia.timeseries.smoothing import mean_smooth
+
+
+
+def map_optimise(x, y, yerr, t0, nu_init, nu_err, amp_init, amp_err,
+    fit_offset=False):
+
+    dim = len(nu_init)
+    x_ = np.linspace(x[0],x[-1],1000)
+    phi_guess = np.array([-0.5*np.pi for x in nu_init])
+
+    with pm.Model() as model:
+
+        # Gaussian priors based frequency extracted from periodogram
+        nu = pm.Bound(pm.Normal, lower=0)(
+            "nu",
+            mu=np.array(nu_init),
+            sd=np.array(nu_err),
+            shape=dim,
+            testval=np.array(nu_init),
+            )
+
+        # Wide log-normal prior for semi-amplitude
+        amp = pm.Bound(pm.Normal, lower=0)(
+            "amp",
+            mu=np.array(amp_init),
+            sd=np.array(amp_err),
+            shape=dim,
+            testval=np.array(amp_init)
+            )
+
+        # Phase -- uses periodic boundary sampled in (sin(theta), cos(theta))
+        # to avoid discontinuity
+        # phase = xo.distributions.Angle("phase", shape=dim,
+        #         testval=np.random.uniform(-np.pi, np.pi, dim))
+        phase = xo.distributions.Angle("phase", shape=dim,
+                testval=np.ones(dim)*np.pi*0.5)
+
+        if fit_offset:
+            offset = pm.Bound(pm.Uniform,lower=-10,upper=10)(
+                    "offset",
+                    shape=dim,
+                    testval=np.zeros(dim)
+                    )
+        else:
+            offset = 0.
+
+
+        # And a function for computing the full RV model
+        def get_sine_model(t, name=""):
+            # Sine wave according to parameters
+
+            sine =  offset + amp*np.sin( 2.*np.pi*nu*(t-t0) + phase )
+            pm.Deterministic("sine" + name, sine)
+
+            # Sum over planets and add the background to get the full model
+            # return pm.Deterministic("sine_model" + name, tt.sum(sine, axis=-1) )
+            return pm.Deterministic("sine_model" + name, sine )
+
+        # Define the model at the observed times
+        sine_model = get_sine_model(x)
+
+        # Also define the model on a fine grid as computed above (for plotting)
+        sine_model_pred = get_sine_model(x_, name="_pred")
+
+        # Finally add in the observation model. This next line adds a new contribution
+        # to the log probability of the PyMC3 model
+        err = tt.sqrt(yerr ** 2)
+        pm.Normal("obs", mu=sine_model, sd=err, observed=y)
+
+
+    plt.errorbar(x, y, yerr=yerr, color='black',marker='.',linestyle='')
+
+    with model:
+
+        plt.plot(x_, xo.eval_in_model(model.sine_model_pred), '--',
+            label="model", color='dodgerblue')
+        map_soln = xo.optimize(start=model.test_point, vars=[amp,phase],
+                        progress_bar=False,tol=1e-10,options={'disp':False})
+        map_soln, info = xo.optimize(start=map_soln,return_info=True,
+                        progress_bar=False,tol=1e-14,options={'disp':False})
+
+    # print('freq: {} --> {}'.format(nu_init[0], map_soln['nu']))
+    plt.plot(x_, map_soln["sine_model_pred"],'-', color='darkorange')
+
+    plt.legend(fontsize=10)
+    plt.xlim(x.min(), x.max())
+    plt.xlabel("time [days]")
+    plt.ylabel("Magnitude")
+    plt.ylim(plt.ylim()[::-1])
+    plt.show()
+
+    if fit_offset:
+        opt_ofst = np.array(map_soln['offset'])
+        fit_offset = False
+    else:
+        opt_ofst = np.array(np.zeros(dim))
+    opt_freq = np.array(map_soln['nu'])
+    opt_ampl = np.array(map_soln['amp'])
+    opt_phase = np.array(map_soln['phase'])
+
+    return np.array([y - map_soln['sine_model']]), opt_ofst, opt_freq, opt_ampl, opt_phase
+
+
+
+def get_snr(nu, amp, use_snr_window=True, snr_window=1., snr_range=[23.,24.]):
+
+    if use_snr_window:
+        npoints = len( nu[nu<=snr_window])
+        mean_ = mean_smooth(amp, npoints)
+    else:
+        idx = np.where( ((nu>=snr_range[0]) & (nu<=snr_range[1])) )
+        mean_ = np.ones_like(nu) * np.median(nu[idx])
+
+    return amp / mean_
+
+
+def run_ipw(times, signal, yerr, maxiter=100, t0=None,
+        f0=None, fn=None, df=None, snr_stop_criteria=4., order_by_snr=False,
+        use_snr_window=True, snr_window=1., snr_range=[23.,24.]):
+
+    residuals = signal[:]
+    residuals_n_minus_1 = signal[:]
+    residuals_n_minus_2 = signal[:]
+    offsets,frequencies, amplitudes, phases = [], [], [], []
+    stop_criteria = []
+    masked = []
+
+    N = len(times)
+    T = times[-1]-times[0]
+    counter = 0
+    rayleigh_freq = 1.5/(times[-1]-times[0])
+    if t0 is None:
+        t0 = 0.5*(times[0]+times[-1])
+
+    stopcrit = False
+
+    nu,amp = scargle(times, residuals, f0=f0, fn=fn, df=df, norm='amplitude')
+
+    # pbar = Bar('Running...', max=maxiter)
+    while maxiter and not stopcrit:
+
+
+        # Find frequency
+        snr_curve = get_snr(nu, amp, use_snr_window=use_snr_window,
+                        snr_window=snr_window, snr_range=snr_range)
+
+        # Identify peak either by maximum SNR
+        if order_by_snr:
+            idx =  np.argmax(snr_curve)
+        # or by maximum amplitude
+        else:
+            idx =  np.argmax(amp)
+
+
+        nu_max = nu[idx]
+        amp_max = amp[idx]
+        mask = np.where( ((nu>=nu_max-0.5*rayleigh_freq) &
+                          (nu<=nu_max+0.5*rayleigh_freq)) )[0]
+
+        sigma = np.std(residuals)
+        nu_err = np.sqrt(6./N) * sigma / (np.pi * amp_max * T)
+        amp_err = np.sqrt(2./N) * sigma
+
+        # Optimize frequencey, amplitude, and phase of peak
+        residuals_, c_, nu_, \
+        amp_, phase_= map_optimise(times, residuals, yerr, t0,
+                        nu_init=[nu_max], nu_err=[nu_err],
+                        amp_init=[amp_max], amp_err=[amp_err],
+                        fit_offset=True)
+        offsets.append(c_)
+        frequencies.append(nu_)
+        amplitudes.append(amp_)
+        phases.append(phase_)
+
+        maxiter -= 1
+        residuals = np.hstack(residuals_)
+
+        nu_res, amp_res = scargle(times, residuals, f0=f0, fn=fn,df=df, norm='amplitude')
+        snr_curve_res = get_snr(nu_res, amp_res, use_snr_window=use_snr_window,
+                        snr_window=snr_window, snr_range=snr_range)
+        noise_res = amp_res / snr_curve_res
+
+        snr_at_nu = amp_ / noise_res[idx]
+
+        stop_criteria.append(snr_at_nu)
+        #
+        plt.plot(nu, amp, 'k-')
+        plt.plot(nu_res, amp_res, '-', color='grey')
+        plt.axhline(amp_,linestyle='--',color='red')
+        plt.axvline(nu[idx],linestyle='--',color='red')
+        plt.axvline(nu_res[idx],linestyle=':',color='blue')
+        plt.show()
+
+        # pbar.next()
+
+        nu = nu_res
+        amp = amp_res
+
+        if snr_at_nu < snr_stop_criteria:
+            stopcrit = True
+
+    # pbar.finish()
+    offsets = np.hstack(offsets)
+    frequencies = np.hstack(frequencies)
+    amplitudes = np.hstack(amplitudes)
+    phases = np.hstack(phases)
+    stop_criteria = np.hstack(stop_criteria)
+
+    return residuals, offsets, frequencies, amplitudes, phases, stop_criteria
+
 
 
 def find_frequency(times,signal,method='scargle',model='sine',full_output=False,

@@ -29,8 +29,10 @@ def defaults_periodogram(fctn):
         f0 = kwargs.get('f0',0.01/T)
         fn = kwargs.get('fn',nyquist)
         df = kwargs.get('df',0.1/T)
-        if df==0: df = 0.1/T
-        if f0==0: f0 = 0.01/T
+        if df is None: df = 0.1/T
+        if f0 is None: f0 = 0.01/T
+        elif f0==0: f0 = 0.01/T
+        if fn is None: fn = nyquist
         if fn>nyquist:
             fn = nyquist
         kwargs['f0'] = f0

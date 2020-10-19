@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import cos,sin,pi
 
-from engine import scargle as fscargle
+from pythia.timeseries.engine import scargle as fscargle
 from pythia.timeseries.decorators import defaults_periodogram
 
 import matplotlib.pyplot as plt
