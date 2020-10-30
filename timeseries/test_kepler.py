@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from pythia.timeseries.periodograms import scargle
-from pythia.timeseries.iterative_prewhitening import run_ipw
+from pythia.timeseries.iterative_prewhitening import run_ipw,run_ipw_v02
 
 if __name__=="__main__":
 
@@ -19,8 +19,16 @@ if __name__=="__main__":
   yerr = 0.005* np.ones_like(times)
   residuals, offsets, \
   frequencies, amplitudes, \
-  phases, stop_criteria = run_ipw(times,fluxes-np.mean(fluxes), yerr, t0=4953.53931246, fn=6.2, maxiter=20)
+  phases, stop_criteria = run_ipw(times,fluxes-np.mean(fluxes), yerr, t0=4953.53931246, fn=6.2, maxiter=3)
   # phases, stop_criteria = run_ipw(times,fluxes-np.mean(fluxes), yerr, t0=55688.70, fn=6.2, maxiter=20)
+  # residuals, outpars= run_ipw_v02(times,fluxes-np.mean(fluxes), yerr, t0=4953.53931246, maxiter=30, fn=6.2)
+  #
+  # frequencies = outpars['frequency']
+  # amplitudes = outpars['amplitude']
+  # phases = outpars['phase']
+  # offsets = np.zeros_like(phases)
+  # offsets[0] += outpars['offset']
+  # stop_criteria = outpars['snr']
 
 
   np.savetxt('test_kepler_pulsator.out',np.array([offsets,frequencies,amplitudes,phases]).T)

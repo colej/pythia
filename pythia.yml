@@ -1,4 +1,4 @@
-name: nominal
+name: pythia
 channels:
   - conda-forge
   - defaults
@@ -262,5 +262,5 @@ dependencies:
     - py==1.9.0
     - pymc3-ext==0.0.2
     - theano==1.0.5
-prefix: /lhome/colej/software/miniconda3/envs/nominal
+prefix: /YOUR/PATH/TO/miniconda3/envs/pythia
 

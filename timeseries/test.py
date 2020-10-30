@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 
 from pythia.timeseries.periodograms import scargle
-from pythia.timeseries.iterative_prewhitening import run_ipw
+from pythia.timeseries.iterative_prewhitening import run_ipw, run_ipw_v02
 
 
 # rc('text', usetex=True)
@@ -40,13 +40,29 @@ if __name__=="__main__":
   yerr = 0.0005* np.ones_like(times)
   residuals, offsets, \
   frequencies, amplitudes, \
-  phases, stop_criteria = run_ipw(times,fluxes-np.mean(fluxes), yerr, maxiter=10)
+  phases, stop_criteria = run_ipw(times,fluxes-np.mean(fluxes), yerr, maxiter=5, fn=30.)
+
+  # yerr = 0.0005* np.ones_like(times)
+  # residuals, outpars= run_ipw_v02(times,fluxes-np.mean(fluxes), yerr, maxiter=5, fn=30.)
+  #
+  # frequencies = outpars['frequency']
+  # amplitudes = outpars['amplitude']
+  # phases = outpars['phase']
+  # offsets = np.zeros_like(phases)
+  # offsets[0] += outpars['offset']
+  # stop_criteria = outpars['snr']
 
   np.savetxt('test.out',np.array([offsets,frequencies,amplitudes,phases]).T)
   fig,ax = plt.subplots(1,1,figsize=(6.6957,6.6957))
 
   print(' C + A*sin( 2*pi*f*(t-t0)+phi )')
   nu_,amp_ = scargle(times, residuals, fn=6.5, norm='amplitude')
+
+  print(offsets)
+  print(frequencies)
+  print(amplitudes)
+  print(phases)
+  print(stop_criteria)
 
   outstr = '{} -- C: {:.6f} -- A: {:.6f} -- f: {:.6f} -- phi: {:.6f} -- SNR: {:.6f}'
   for ii,freq in enumerate(frequencies):
