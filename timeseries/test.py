@@ -38,7 +38,7 @@ if __name__=="__main__":
   plt.show()
 
   yerr = 0.0005* np.ones_like(times)
-  residuals, offsets, \
+  residuals, model, offsets, \
   frequencies, amplitudes, \
   phases, stop_criteria = run_ipw(times,fluxes-np.mean(fluxes), yerr, maxiter=5, fn=30.)
 
