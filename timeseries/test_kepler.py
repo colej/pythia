@@ -1,13 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pythia.timeseries.periodograms import scargle
-from pythia.timeseries.iterative_prewhitening import run_ipw,run_ipw_v02
+from pythia.timeseries.iterative_prewhitening import run_ipw
+from pythia.timeseries.periodograms_native import LS_periodogram
 
 if __name__=="__main__":
 
   times,fluxes = np.loadtxt("./test_kepler_pulsator.txt",unpack=True)
-  nu,amp = scargle(times,fluxes-np.mean(fluxes),fn=6.5,norm='amplitude')
+  nu, amp = LS_periodogram( times, fluxes-np.mean(fluxes), fn=6.5,
+                            normalisation='amplitude')
 
   fig,ax = plt.subplots(1,1,figsize=(6.6957,6.6957))
   ax.plot(nu,amp,'k-')
@@ -17,25 +18,22 @@ if __name__=="__main__":
   plt.show()
 
   yerr = 0.005* np.ones_like(times)
-  residuals, offsets, \
+
+  residuals, model, offsets, \
   frequencies, amplitudes, \
-  phases, stop_criteria = run_ipw(times,fluxes-np.mean(fluxes), yerr, t0=4953.53931246, fn=6.2, maxiter=3)
-  # phases, stop_criteria = run_ipw(times,fluxes-np.mean(fluxes), yerr, t0=55688.70, fn=6.2, maxiter=20)
-  # residuals, outpars= run_ipw_v02(times,fluxes-np.mean(fluxes), yerr, t0=4953.53931246, maxiter=30, fn=6.2)
-  #
-  # frequencies = outpars['frequency']
-  # amplitudes = outpars['amplitude']
-  # phases = outpars['phase']
-  # offsets = np.zeros_like(phases)
-  # offsets[0] += outpars['offset']
-  # stop_criteria = outpars['snr']
+  phases, stop_criteria, \
+  noise_curve = run_ipw( times,fluxes-np.mean(fluxes),
+                         yerr, t0=4953.53931246, fn=6.2,
+                         maxiter=3)
+
 
 
   np.savetxt('test_kepler_pulsator.out',np.array([offsets,frequencies,amplitudes,phases]).T)
   fig,ax = plt.subplots(1,1,figsize=(6.6957,6.6957))
 
   print(' C + A*sin( 2*pi*f*(t-t0)+phi )')
-  nu_,amp_ = scargle(times, residuals, fn=6.5, norm='amplitude')
+  nu_, amp_ = LS_periodogram( times, residuals, fn=6.5,
+                            normalisation='amplitude')
 
   outstr = '{} -- C: {:.6f} -- A: {:.6f} -- f: {:.6f} -- phi: {:.6f} -- SNR: {:.6f}'
   for ii,freq in enumerate(frequencies):
