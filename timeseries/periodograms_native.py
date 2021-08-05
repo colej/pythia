@@ -7,8 +7,8 @@ def normalise_distribution(s1, times):
     return s1/s1_var
 
 def normalise_amplitude(s1, times):
-    norm_factor = np.sqrt(4.0 / len(times))
-    return np.sqrt(s1) * norm_factor
+    norm_factor = np.sqrt( 1. / len(times))
+    return np.sqrt(s1) * 2. * norm_factor
 
 def normalise_power_density(s1, times):
     T = times.ptp()
@@ -19,8 +19,8 @@ def normalise_power(s1, times):
     return s1
 
 
-def LS_periodogram(times, signal, f0=None, fn=None,
-                 oversample_factor=10.0, normalisation='amplitude'):
+def LS_periodogram(times, signal, dy=None, f0=None, fn=None,
+                   oversample_factor=10.0, normalisation='amplitude'):
 
     """
     Calculates the amplitude spectrum of a given signal
@@ -50,12 +50,17 @@ def LS_periodogram(times, signal, f0=None, fn=None,
     if fn is None:
         fn = 0.5 / np.median(np.diff(times))  # *nyq_mult
 
-    freq = np.arange(f0, fn, df / oversample_factor)
-    model = LombScargle(times, signal)
-    sc = model.power(freq, method="fast", normalization="standard")
+    freq  = np.arange(f0, fn, df / oversample_factor)
+    ls_   = LombScargle(times, signal, dy=dy)
+    sc    = ls_.power(freq, method="fast", normalization="psd")
+
+    if dy is None:
+        dy = np.array([1.]) #np.ones_like(signal)
+    w     = (dy ** -2.0).sum()
+    power = (1. * sc) / w
 
     ## Normalised to return desired output units
     noramlise_str = 'normalise_{}'.format(normalisation)
-    LS_out = eval(noramlise_str+'(sc,times)')
+    LS_out = eval(noramlise_str+'(power,times)')
 
     return freq, LS_out
