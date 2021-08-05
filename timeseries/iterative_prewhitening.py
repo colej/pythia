@@ -208,7 +208,7 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
     residuals = signal[:]
     residuals_n_minus_1 = signal[:]
     residuals_n_minus_2 = signal[:]
-    offsets,frequencies, amplitudes, phases = [], [], [], []
+    offsets, frequencies, amplitudes, phases = [], [], [], []
     stop_criteria = []
     masked = []
     indices = []
@@ -258,6 +258,7 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
                         nu_init=[nu_max], nu_err=[nu_err],
                         amp_init=[amp_max], amp_err=[amp_err],
                         fit_offset=fit_offset)
+
         offsets.append(c_)
         frequencies.append(nu_)
         amplitudes.append(amp_)
@@ -279,6 +280,7 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
         snr_at_nu = amp_ / noise_res[idx]
 
         stop_criteria.append(snr_at_nu)
+
         #
         # plt.plot(nu, amp, 'k-')
         # plt.plot(nu_res, amp_res, '-', color='grey')
@@ -299,9 +301,9 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
     pbar.finish()
     ## Do one final optimisation with all of the frequencies
     sigma = np.std(signal)
-    nu_err = [ np.sqrt(6./N) * sigma / (np.pi * a * T)
+    nu_err = [ 2.*np.sqrt(6./N) * sigma / (np.pi * a * T)
                for a in np.hstack(amplitudes) ]
-    amp_err = [ np.sqrt(2./N) * sigma for a in amplitudes ]
+    amp_err = [ 2. * np.sqrt(2./N) * sigma for a in amplitudes ]
     frequencies = np.hstack(frequencies)
     amplitudes = np.hstack(amplitudes)
     phases = np.hstack(phases)
@@ -329,7 +331,9 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
 
     snr_final = []
     for ii,idx in enumerate(indices):
+        # snr_final.append( ls_amplitudes[ii] / noise_f[idx])
         snr_final.append( amp_f[ii] / noise_f[idx])
+
 
     residuals_f = np.hstack(residuals_f)
     offsets = np.hstack(c_f)
