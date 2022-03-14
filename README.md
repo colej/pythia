@@ -1,6 +1,12 @@
 # pythia
-# Authors: Cole Johnston
-Modules and routines for analysis of data from the PLATO2.0 mission
+# Author: Cole Johnston
+
+
+## Contributors: Dominic Bowman
+
+
+Modules and routines for time-series analysis of astronomical data sets.
+
 
 timeseries/periodograms -- library containing functions for time-series analysis
 
@@ -13,10 +19,7 @@ in your directory structure.
 To install, use miniconda3 or anaconda3, and run:
         conda env create -f pythia.yml
 
-To compile fortran modules, run the following:
-        python -m numpy.f2py -c -m engine engine.f95
-
 
 TO DO:
-  Include DFT, FASPER, RL routines in f95/03/08
-  Include Cython wrappers of scargle, dft, fasper, NFFT routines
+  Include GUI support
+  Include Gaussian Processes
