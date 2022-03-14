@@ -2,6 +2,7 @@ import scipy as sp
 import numpy as np
 import pymc3 as pm
 import exoplanet as xo
+import pymc3_ext as pmx
 import lightkurve as lk
 import theano.tensor as tt
 import matplotlib.pyplot as plt
@@ -77,8 +78,11 @@ def map_optimise( x, y, yerr, t0, nu_init, nu_err, amp_init, amp_err,
         #     phase_init = np.random.uniform(-np.pi, np.pi, dim)
         # phase = pm.Uniform( "phase", lower = -np.pi, upper = np.pi,
         #                     shape=dim, testval=phase_init)
-        phase = xo.distributions.Angle("phase", shape=dim,
-                testval=np.ones(dim)*np.pi*0.2)
+        # phase = xo.distributions.Angle("phase", shape=dim,
+        #         testval=np.ones(dim)*np.pi*0.2)
+        phase = pm.Uniform('phase', lower=-np.pi, upper=np.pi, shape=dim,
+                           testval=np.ones(dim)*np.pi*0.2,
+                           transform=pm.transforms.circular)
 
 
         if fit_offset:
@@ -115,18 +119,20 @@ def map_optimise( x, y, yerr, t0, nu_init, nu_err, amp_init, amp_err,
 
         # Finally add in the observation model. This next line adds a new contribution
         # to the log probability of the PyMC3 model
-        err = tt.sqrt(yerr ** 2)
-        pm.Normal("obs", mu=sine_model, sd=err, observed=y)
-
+        if yerr is None:
+            pm.Normal("obs", mu=sine_model, observed=y)
+        else:
+            err = tt.sqrt(yerr ** 2)
+            pm.Normal("obs", mu=sine_model, sd=err, observed=y)
 
     # plt.errorbar(x, y, yerr=yerr, color='black',marker='.',linestyle='')
 
     with model:
 
-        map_soln = xo.optimize(start=model.test_point, vars=[phase],
-                        progress_bar=False,tol=1e-10,options={'disp':False})
-        map_soln, info = xo.optimize(start=map_soln,return_info=True,
-                        progress_bar=False,tol=1e-15,options={'disp':False})
+        map_soln = pmx.optimize(start=model.test_point, vars=[phase],
+                        tol=1e-10,options={'disp':False})
+        map_soln, info = pmx.optimize(start=map_soln,return_info=True,
+                        tol=1e-15,options={'disp':False})
         # map_soln, info = xo.optimize(start=model.test_point,return_info=True,
         #                 progress_bar=False,tol=1e-15,options={'disp':False})
 
@@ -191,7 +197,7 @@ def sine_func(x, freq, ampl, phase):
 def get_snr(nu, amp, use_snr_window=True, snr_window=1., snr_range=[23.,24.]):
 
     if use_snr_window:
-        npoints = len( nu[nu<=snr_window])
+        npoints = len( nu[ nu <= nu[0] + snr_window ])
         mean_ = mean_smooth(amp, npoints)
     else:
         idx = np.where( ((nu>=snr_range[0]) & (nu<=snr_range[1])) )
