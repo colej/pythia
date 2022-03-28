@@ -20,6 +20,8 @@ To install, use miniconda3 or anaconda3, and run:
         conda env create -f pythia.yml
 
 
-TO DO:
-  Include GUI support
-  Include Gaussian Processes
+### TO DO:
+  - Generalize handling of priors
+  - Include GUI support
+  - Include Gaussian Processes
+  - Expand to multiple filters (long term)
