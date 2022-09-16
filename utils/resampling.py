@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def run_binning(x,y,yerr=None,phStart=-0.5,phStop=0.5,nbins=100):
 	# Binning function -- takes into account aliasing and error
 	# propogation on errorbins
