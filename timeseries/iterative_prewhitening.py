@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from progress.bar import Bar
 # from pythia.timeseries.periodograms import scargle
-from pythia.timeseries.utils import mean_smooth
+from pythia.utils import mean_smooth
 from pythia.timeseries.periodograms import LS_periodogram
 
 
