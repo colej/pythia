@@ -1,1 +1,1 @@
-__all__=["periodograms","smoothing","iterative_prewhitening"]
+__all__=["periodograms","iterative_prewhitening"]
