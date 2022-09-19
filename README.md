@@ -1,6 +1,6 @@
 # pythia
 # Author: Cole Johnston
-
+# co-authors: Nora Eisner
 
 ## Contributors: Dominic Bowman
 
