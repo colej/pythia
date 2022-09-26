@@ -11,6 +11,8 @@ Modules and routines for time-series analysis of astronomical data sets.
 timeseries/periodograms -- library containing functions for time-series analysis
 
 
+First, clone pythia into a location where your PYTHONPATH points.
+
 Before installing, you must modify the contents of the yml file!
 At the bottom, the prefix variable currently says: /YOUR/PATH/TO/miniconda3...
 This needs to be changed to reflect the location of miniconda3 (or anaconda3)
