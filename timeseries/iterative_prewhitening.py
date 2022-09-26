@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from progress.bar import Bar
 # from pythia.timeseries.periodograms import scargle
-from pythia.utils import mean_smooth
+from pythia.utils.resampling import run_mean_smooth
 from pythia.timeseries.periodograms import LS_periodogram
 
 
@@ -198,7 +198,7 @@ def get_snr(nu, amp, use_snr_window=True, snr_window=1., snr_range=[23.,24.]):
 
     if use_snr_window:
         npoints = len( nu[ nu <= nu[0] + snr_window ])
-        mean_ = mean_smooth(amp, npoints)
+        mean_ = run_mean_smooth(amp, npoints)
     else:
         idx = np.where( ((nu>=snr_range[0]) & (nu<=snr_range[1])) )
         mean_ = np.ones_like(nu) * np.median(amp[idx])

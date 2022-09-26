@@ -4,16 +4,15 @@ import numpy as np
 def run_binning(x,y,yerr=None,phStart=-0.5,phStop=0.5,nbins=100):
 	# Binning function -- takes into account aliasing and error
 	# propogation on errorbins
-	bwidth = (abs(phStart - phStop))/nbins
+    bwidth = (abs(phStart - phStop))/nbins
 
-	print 'Adopted bin-width: ',bwidth
-	bins      = np.arange(phStart,phStop+bwidth,bwidth)
-	bin_means = ( np.histogram(x,bins,weights=y)[0] / np.histogram(x,bins)[0] )
-	if yerr is not None:
-		bin_errs = ( np.histogram(x,bins,weights=yerr)[0] / np.histogram(x,bins)[0] )
-	else:
-		bin_errs = None
-
+    print('Adopted bin-width: ',bwidth)
+    bins      = np.arange(phStart,phStop+bwidth,bwidth)
+    bin_means = ( np.histogram(x,bins,weights=y)[0] / np.histogram(x,bins)[0] )
+    if yerr is not None:
+        bin_errs = ( np.histogram(x,bins,weights=yerr)[0] / np.histogram(x,bins)[0] )
+    else:
+        bin_errs = None
     bins = bins[:-1] + 0.5 * bwidth
 
     return bins,bin_means,bin_errs
