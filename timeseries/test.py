@@ -3,27 +3,38 @@ import matplotlib.pyplot as plt
 
 from matplotlib import rc
 
-from pythia.timeseries.periodograms import scargle
+from pythia.timeseries.periodograms import LS_periodogram
 from pythia.timeseries.iterative_prewhitening import run_ipw
 
 
-# rc('text', usetex=True)
-rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
-# plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
-plt.rcParams['xtick.labelsize']=12
-plt.rcParams['ytick.labelsize']=12
+plt.rcParams.update({
+    "text.usetex": True,
+        "font.family": "sans-serif",
+    "font.sans-serif": ["Helvetica"]})
+plt.rcParams.update({
+    "pgf.rcfonts": False,
+    "pgf.texsystem": "pdflatex",
+    "pgf.preamble": "\n".join([
+         r"\usepackage{amsmath}",
+         r"\usepackage[utf8x]{inputenc}",
+         r"\usepackage[T1]{fontenc}",
+         r"\usepackage{cmbright}",
+    ]),
+})
 
-
+plt.rcParams['xtick.labelsize']=18
+plt.rcParams['ytick.labelsize']=18
 if __name__=="__main__":
 
   # times,fluxes = np.loadtxt("./test.data",unpack=True)
   times,fluxes = np.loadtxt("./test_tess.dat",unpack=True)
-  nu_w,amp_w = scargle(times,np.ones_like(times),f0=-5.,fn=5.,norm='amplitude')
-  nu,amp = scargle(times,fluxes-np.mean(fluxes),fn=50.,norm='amplitude')
+  nu_w,amp_w = scargle(times,np.ones_like(times),f0=0.001,fn=5.)
+  nu,amp = scargle(times,fluxes-np.mean(fluxes),fn=50.)
 
 
   figw,axw = plt.subplots(1,1,figsize=(6.6957,6.6957),num=2)
   axw.plot(nu_w,amp_w,'k-')
+  axw.plot(-1.*nu_w,amp_w,'k-')
   axw.set_xlabel(r'$\nu\,\,{\rm [d^{-1}]}$',fontsize=14)
   axw.set_ylabel(r'${\rm Amplitude\,\,[ppm]}$',fontsize=14)
   axw.set_title(r'${\rm Window}$',fontsize=14)
@@ -39,8 +50,8 @@ if __name__=="__main__":
 
   yerr = 0.0005* np.ones_like(times)
   residuals, model, offsets, \
-  frequencies, amplitudes, \
-  phases, stop_criteria = run_ipw(times,fluxes-np.mean(fluxes), yerr, maxiter=5, fn=30.)
+  frequencies, amplitudes, phases,\
+  stop_criteria, noise_level = run_ipw(times,fluxes-np.mean(fluxes), yerr, maxiter=5, fn=30.)
 
   np.savetxt('test.out',np.array([offsets,frequencies,amplitudes,phases]).T)
   fig,ax = plt.subplots(1,1,figsize=(6.6957,6.6957))
