@@ -18,7 +18,7 @@ def get_interp_model(x, y, period, t0,
     xx_, yy_ = [], []
     for ii, knots in enumerate(phase_knots):
 
-        xk, yk, _ = run_binning(xx,yy,yerr=None, phStart=knots[0],
+        xk, yk, _ = run_binning(xx,yy, yerr=None, phStart=knots[0],
                                 phStop=knots[1], nbins=nbins[ii])
 
         xx_.append(xk)
@@ -33,20 +33,3 @@ def get_interp_model(x, y, period, t0,
     # returns phase array (ph), binned phase (x_) and flux (y_) points used
     # to calculate the model, and the interpolation function (ifunc)
     return ph, x_, y_, ifunc
-
-    #
-    # x1,y1, _ = run_binning(xx, yy,
-    #                           yerr=None,
-    #                           phStart=-0.5, phStop=-0.4, nbins=20)
-    # x2,y2, _ = run_binning(xx, yy,
-    #                               yerr=None,
-    #                               phStart=-0.39, phStop=-0.11, nbins=15)
-    # x3,y3, _ = run_binning(xx, yy,
-    #                               yerr=None,
-    #                               phStart=-0.1, phStop=0.1, nbins=50)
-    # x4,y4, _ = run_binning(xx, yy,
-    #                               yerr=None,
-    #                               phStart=0.11, phStop=0.39, nbins=15)
-    # x5,y5, _ = run_binning(xx, yy,
-    #                               yerr=None,
-    #                               phStart=0.4, phStop=0.5, nbins=20)
