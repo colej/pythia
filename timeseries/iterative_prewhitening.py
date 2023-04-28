@@ -1,14 +1,14 @@
-import scipy as sp
+import pytensor
+import pymc as pm
+import arviz as az
 import numpy as np
-import pymc3 as pm
-import exoplanet as xo
-import pymc3_ext as pmx
-import lightkurve as lk
-import theano.tensor as tt
+import scipy as sp
+import pandas as pd
+import xarray as xr
+import pytensor.tensor as pt
 import matplotlib.pyplot as plt
 
 from progress.bar import Bar
-# from pythia.timeseries.periodograms import scargle
 from pythia.utils.resampling import run_mean_smooth
 from pythia.timeseries.periodograms import LS_periodogram
 
@@ -44,7 +44,7 @@ def get_correlation_factor(residus):
 
 def map_optimise( x, y, yerr, t0, nu_init, nu_err, amp_init, amp_err,
                   phase_init=None, phase_err=None, fit_offset=False,
-                  return_model=False):
+                ):
 
     dim = len(nu_init)
     x_ = np.linspace(x.min(),x.max(),1000)
@@ -53,63 +53,55 @@ def map_optimise( x, y, yerr, t0, nu_init, nu_err, amp_init, amp_err,
     with pm.Model() as model:
 
         # Gaussian priors based frequency extracted from periodogram
-        nu = pm.Bound(pm.Normal, lower=0)(
-            "nu",
-            mu=np.array(nu_init),
-            sd=np.array(nu_err),
-            shape=dim,
-            testval=np.array(nu_init),
-            )
+        nu = pm.Truncated("nu",
+                          pm.Normal.dist(
+                                         mu=np.array(nu_init),
+                                         sigma=np.array(nu_err),
+                                         ),
+                          lower=0.001,
+                          shape=dim,
+                          initval=np.array(nu_init))
 
         # Wide log-normal prior for semi-amplitude
-        amp = pm.Bound(pm.Normal, lower=0)(
-            "amp",
-            mu=np.array(amp_init),
-            sd=np.array(amp_err),
-            shape=dim,
-            testval=np.array(amp_init)
-            )
+        amp = pm.Truncated("amp",
+                           pm.Normal.dist(
+                                          mu=np.array(amp_init),
+                                          sigma=np.array(amp_err),
+                                          ),
+                           shape=dim,
+                           initval=np.array(amp_init),
+                           lower=np.min(np.array(amp_init))*0.1)
+
 
         # Phase -- uses periodic boundary sampled in (sin(theta), cos(theta))
         # to avoid discontinuity
-        # phase = xo.distributions.Angle("phase", shape=dim,
-        #         testval=np.random.uniform(-np.pi, np.pi, dim))
-        # if phase_init is None:
-        #     phase_init = np.random.uniform(-np.pi, np.pi, dim)
-        # phase = pm.Uniform( "phase", lower = -np.pi, upper = np.pi,
-        #                     shape=dim, testval=phase_init)
-        # phase = xo.distributions.Angle("phase", shape=dim,
-        #         testval=np.ones(dim)*np.pi*0.2)
         phase = pm.Uniform('phase', lower=-np.pi, upper=np.pi, shape=dim,
-                           testval=np.ones(dim)*np.pi*0.2,
-                           transform=pm.transforms.circular)
+                           initval=np.ones(dim)*np.pi*0.2,
+                           transform=pm.distributions.transforms.circular)
 
 
         if fit_offset:
-            offset = pm.Bound(pm.Uniform,lower=-10,upper=10)(
-                    "offset",
-                    shape=1,
-                    testval=np.array([0.])
-                    )
+            offset = pm.Uniform("offset", lower=-10, upper=10,
+                                shape=1, initval=np.array([0.])
+                                )
         else:
             offset = 0.
 
 
         # And a function for computing the full RV model
         def get_sine_model(t, name=""):
+
+            t_ = pt.shape_padright(t) - t0
+
             # Sine wave according to parameters
-
-            # sine =  offset + amp*np.sin( 2.*np.pi*nu*(t-t0) + phase )
-            t_ = tt.shape_padright(t) - t0
-
-            sine =  tt.squeeze( amp*tt.sin( 2.*np.pi*nu*(t_) + phase ) )
+            sine =  pt.squeeze( amp*pt.sin( 2.*np.pi*nu*(t_) + phase ) )
             pm.Deterministic("sine" + name, sine)
 
             # Sum over planets and add the background to get the full model
             if dim ==  1:
                 return pm.Deterministic("sine_model" + name, offset + sine )
             else:
-                return pm.Deterministic("sine_model" + name, offset + tt.sum(sine, axis=-1) )
+                return pm.Deterministic("sine_model" + name, offset + pt.sum(sine, axis=-1) )
 
         # Define the model at the observed times
         sine_model = get_sine_model(x)
@@ -120,21 +112,19 @@ def map_optimise( x, y, yerr, t0, nu_init, nu_err, amp_init, amp_err,
         # Finally add in the observation model. This next line adds a new contribution
         # to the log probability of the PyMC3 model
         if yerr is None:
-            pm.Normal("obs", mu=sine_model, observed=y)
+            likelihood = pm.Normal("obs", mu=sine_model, observed=y)
         else:
-            err = tt.sqrt(yerr ** 2)
-            pm.Normal("obs", mu=sine_model, sd=err, observed=y)
+            err = pt.sqrt(yerr ** 2)
+            likelihood = pm.Normal("obs", mu=sine_model, sigma=err, observed=y)
 
     # plt.errorbar(x, y, yerr=yerr, color='black',marker='.',linestyle='')
 
     with model:
-
-        map_soln = pmx.optimize(start=model.test_point, vars=[phase],
-                        tol=1e-10,options={'disp':False})
-        map_soln, info = pmx.optimize(start=map_soln,return_info=True,
-                        tol=1e-15,options={'disp':False})
-        # map_soln, info = xo.optimize(start=model.test_point,return_info=True,
-        #                 progress_bar=False,tol=1e-15,options={'disp':False})
+        map_phase = pm.find_MAP( vars=[phase], method='L-BFGS-B',
+                                 progressbar=False)
+        map_phamp = pm.find_MAP( start=map_phase, vars=[amp],
+                                 method='L-BFGS-B', progressbar=False)
+        map_soln = pm.find_MAP(start=map_phamp, method='L-BFGS-B')
 
 
     # plt.plot(x_, map_soln["sine_model_pred"],'-', color='darkorange')
@@ -157,11 +147,24 @@ def map_optimise( x, y, yerr, t0, nu_init, nu_err, amp_init, amp_err,
     opt_ampl = np.array(map_soln['amp'])
     opt_phase = np.array(map_soln['phase'])
 
-    if return_model:
-        model = map_soln['sine_model']
+    model = map_soln['sine_model']
+    return np.array(y - model), model, opt_ofst, opt_freq, opt_ampl, opt_phase
+
+
+
+def get_stats(trace, var, circular=False, pdf=False):
+
+    posterior = np.concatenate(trace.posterior[var].values)
+    median = np.median(posterior)
+    hdi    = az.hdi(posterior, circular=circular)[0]
+    upper  = hdi[1] - median
+    lower  = median - hdi[0]
+    if pdf:
+        grid, pdf = az.stats.kde(posterior)
     else:
-        model = None
-    return np.array(y - map_soln['sine_model']), model, opt_ofst, opt_freq, opt_ampl, opt_phase
+        grid, pdf = None, None
+
+    return median, upper, lower, grid, pdf
 
 
 def sine_func_fixed_freq(p0, x, y, yerr, freqs, amps, return_sum = True):
@@ -287,7 +290,7 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
 
         stop_criteria.append(snr_at_nu)
 
-        #
+
         # plt.plot(nu, amp, 'k-')
         # plt.plot(nu_res, amp_res, '-', color='grey')
         # plt.axhline(amp_,linestyle='--',color='red')
@@ -323,7 +326,8 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
     amp_f, phase_f = map_optimise(times, signal, yerr, t0,
                     nu_init= frequencies, nu_err=nu_err,
                     amp_init=amplitudes, amp_err=amp_err,
-                    fit_offset=True, return_model=True)
+                    fit_offset=True)
+
 
     nu_final, amp_final = LS_periodogram( times, residuals_f, f0=f0, fn=fn,
                                           normalisation='amplitude')

@@ -57,7 +57,7 @@ if __name__=="__main__":
   fig,ax = plt.subplots(1,1,figsize=(6.6957,6.6957))
 
   print(' C + A*sin( 2*pi*f*(t-t0)+phi )')
-  nu_,amp_ = LS_periodogram(times, residuals, fn=6.5, norm='amplitude')
+  nu_,amp_ = LS_periodogram(times, residuals, fn=6.5, normalisation='amplitude')
 
   print(offsets)
   print(frequencies)
