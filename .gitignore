@@ -11,3 +11,6 @@
 
 __pycache__/
 timeseries/__pycache__/
+*.egg-info
+build/
+dist/
