@@ -12,8 +12,10 @@ dependencies:
   - argon2-cffi-bindings=21.2.0=py311hd4cff14_3
   - arviz=0.15.1=pyhd8ed1ab_0
   - astropy=5.2.1=py311hcb2cf0a_0
+  - astroquery=0.4.6=pyhd8ed1ab_0
   - asttokens=2.2.1=pyhd8ed1ab_0
   - attrs=22.2.0=pyh71513ae_0
+  - autograd=1.5=pyhd8ed1ab_0
   - backcall=0.2.0=pyh9f0ad1d_0
   - backports=1.0=pyhd8ed1ab_3
   - backports.functools_lru_cache=1.6.4=pyhd8ed1ab_0
@@ -24,6 +26,7 @@ dependencies:
   - blas=2.116=openblas
   - blas-devel=3.9.0=16_linux64_openblas
   - bleach=6.0.0=pyhd8ed1ab_0
+  - bokeh=3.1.0=pyhd8ed1ab_0
   - brotli=1.0.9=h166bdaf_8
   - brotli-bin=1.0.9=h166bdaf_8
   - brotlipy=0.7.0=py311hd4cff14_1005
@@ -38,12 +41,14 @@ dependencies:
   - cffi=1.15.1=py311h409f033_3
   - charset-normalizer=2.1.1=pyhd8ed1ab_0
   - cloudpickle=2.2.1=pyhd8ed1ab_0
+  - colorama=0.4.6=pyhd8ed1ab_0
   - comm=0.1.3=pyhd8ed1ab_0
   - cons=0.4.5=pyhd8ed1ab_0
   - contourpy=1.0.7=py311ha3edf6b_0
   - cryptography=38.0.4=py311hb3c386c_0
   - cxx-compiler=1.5.2=hf52228f_0
   - cycler=0.11.0=pyhd8ed1ab_0
+  - cython=0.29.34=py311hcafe171_0
   - dbus=1.13.18=hb2f20db_0
   - debugpy=1.6.6=py311hcafe171_0
   - decorator=5.1.1=pyhd8ed1ab_0
@@ -53,11 +58,13 @@ dependencies:
   - executing=1.2.0=pyhd8ed1ab_0
   - expat=2.5.0=h27087fc_0
   - fastprogress=1.0.3=pyhd8ed1ab_0
+  - fbpca=1.0=py_0
   - filelock=3.10.0=pyhd8ed1ab_0
   - flit-core=3.8.0=pyhd8ed1ab_0
   - fontconfig=2.14.2=h14ed4e7_0
   - fonttools=4.39.2=py311h2582759_0
   - freetype=2.12.1=hca18f0e_1
+  - future=0.18.3=pyhd8ed1ab_0
   - gcc=11.3.0=h02d0930_11
   - gcc_impl_linux-64=11.3.0=hab1b70f_19
   - gcc_linux-64=11.3.0=he6f903b_11
@@ -73,6 +80,7 @@ dependencies:
   - h5netcdf=1.1.0=pyhd8ed1ab_1
   - h5py=3.8.0=nompi_py311h518a8e0_101
   - hdf5=1.14.0=nompi_h5231ba7_103
+  - html5lib=1.1=pyh9f0ad1d_0
   - icu=58.2=hf484d3e_1000
   - idna=3.4=pyhd8ed1ab_0
   - importlib-metadata=6.1.0=pyha770c72_0
@@ -82,8 +90,11 @@ dependencies:
   - ipython=8.11.0=pyh41d4057_0
   - ipython_genutils=0.2.0=py_1
   - ipywidgets=8.0.5=pyhd8ed1ab_0
+  - jaraco.classes=3.2.3=pyhd8ed1ab_0
   - jedi=0.18.2=pyhd8ed1ab_0
+  - jeepney=0.8.0=pyhd8ed1ab_0
   - jinja2=3.1.2=pyhd8ed1ab_1
+  - joblib=1.2.0=pyhd8ed1ab_0
   - jpeg=9e=h0b41bf4_3
   - jsonschema=4.17.3=pyhd8ed1ab_0
   - jupyter=1.0.0=py311h38be061_8
@@ -96,6 +107,7 @@ dependencies:
   - jupyterlab_pygments=0.2.2=pyhd8ed1ab_0
   - jupyterlab_widgets=3.0.6=pyhd8ed1ab_0
   - kernel-headers_linux-64=2.6.32=he073ed8_15
+  - keyring=23.13.1=py311h38be061_0
   - keyutils=1.6.1=h166bdaf_0
   - kiwisolver=1.4.4=py311h4dd048b_1
   - krb5=1.19.3=h3790be6_0
@@ -145,15 +157,18 @@ dependencies:
   - libxml2=2.9.14=h74e7548_0
   - libxslt=1.1.35=h4e12654_0
   - libzlib=1.2.13=h166bdaf_4
+  - lightkurve=2.4.0=pyhd8ed1ab_0
   - llvm-openmp=16.0.0=h417c0b6_0
   - logical-unification=0.4.5=pyhd8ed1ab_0
   - markupsafe=2.1.2=py311h2582759_0
   - matplotlib-base=3.7.1=py311h8597a09_0
   - matplotlib-inline=0.1.6=pyhd8ed1ab_0
+  - memoization=0.4.0=pyhd8ed1ab_1
   - minikanren=1.0.3=pyhd8ed1ab_0
   - mistune=2.0.5=pyhd8ed1ab_0
   - mkl=2022.2.1=h84fe81f_16997
   - mkl-service=2.4.0=py311hb711fc7_0
+  - more-itertools=9.1.0=pyhd8ed1ab_0
   - multipledispatch=0.6.0=py_0
   - munkres=1.1.4=pyh9f0ad1d_0
   - nbclassic=0.5.3=pyhb4ecaf3_3
@@ -169,6 +184,7 @@ dependencies:
   - nspr=4.35=h27087fc_0
   - nss=3.89=he45b914_0
   - numpy=1.24.2=py311h8e6699e_0
+  - oktopus=0.1.2=py_0
   - openblas=0.3.21=pthreads_h320a7e8_3
   - openjpeg=2.5.0=hfec8fc6_2
   - openssl=1.1.1t=h0b41bf4_0
@@ -177,6 +193,7 @@ dependencies:
   - pandoc=3.1.1=h32600fe_0
   - pandocfilters=1.5.0=pyhd8ed1ab_0
   - parso=0.8.3=pyhd8ed1ab_0
+  - patsy=0.5.3=pyhd8ed1ab_0
   - pcre2=10.40=hc3806b6_0
   - pexpect=4.8.0=pyh1a96a4e_2
   - pickleshare=0.7.5=py_1003
@@ -213,6 +230,7 @@ dependencies:
   - python-json-logger=2.0.7=pyhd8ed1ab_0
   - python_abi=3.11=3_cp311
   - pytz=2022.7.1=pyhd8ed1ab_0
+  - pyvo=1.4.1=pyhd8ed1ab_0
   - pyyaml=6.0=py311hd4cff14_5
   - pyzmq=25.0.2=py311hd6ccaeb_0
   - qt-main=5.15.2=h327a75a_7
@@ -225,7 +243,9 @@ dependencies:
   - requests=2.28.2=pyhd8ed1ab_0
   - rfc3339-validator=0.1.4=pyhd8ed1ab_0
   - rfc3986-validator=0.1.1=pyh9f0ad1d_0
+  - scikit-learn=1.2.2=py311h103fc68_1
   - scipy=1.10.1=py311h8e6699e_0
+  - secretstorage=3.3.3=py311h38be061_1
   - send2trash=1.8.0=pyhd8ed1ab_0
   - setuptools=67.6.0=pyhd8ed1ab_0
   - sip=6.6.2=py311h6a678d5_0
@@ -237,15 +257,18 @@ dependencies:
   - sysroot_linux-64=2.12=he073ed8_15
   - tbb=2021.7.0=hdb19cb5_0
   - terminado=0.17.1=pyh41d4057_0
+  - threadpoolctl=3.1.0=pyh8a188c0_0
   - tinycss2=1.2.1=pyhd8ed1ab_0
   - tk=8.6.12=h27826a3_0
   - toml=0.10.2=pyhd8ed1ab_0
   - toolz=0.12.0=pyhd8ed1ab_0
   - tornado=6.2=py311hd4cff14_1
+  - tqdm=4.65.0=pyhd8ed1ab_1
   - traitlets=5.9.0=pyhd8ed1ab_0
   - typing-extensions=4.5.0=hd8ed1ab_0
   - typing_extensions=4.5.0=pyha770c72_0
   - tzdata=2022g=h191b570_0
+  - uncertainties=3.1.7=pyhd8ed1ab_0
   - urllib3=1.26.15=pyhd8ed1ab_0
   - wcwidth=0.2.6=pyhd8ed1ab_0
   - webencodings=0.5.1=py_1
@@ -256,6 +279,7 @@ dependencies:
   - xarray-einstats=0.5.1=pyhd8ed1ab_0
   - xorg-libxau=1.0.9=h7f98852_0
   - xorg-libxdmcp=1.1.3=h7f98852_0
+  - xyzservices=2023.2.0=pyhd8ed1ab_0
   - xz=5.2.6=h166bdaf_0
   - yaml=0.2.5=h7f98852_2
   - zeromq=4.3.4=h9c3ff4c_1
@@ -270,5 +294,5 @@ dependencies:
       - jaxopt==0.6
       - numpyro==0.11.0
       - opt-einsum==3.3.0
-      - tqdm==4.65.0
-prefix: /lhome/colej/software/miniconda3/envs/pythia
+      - pythia==0.1.0
+prefix: /YOUR/PATH/TO/miniconda3/envs/pythia
