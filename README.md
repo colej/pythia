@@ -21,6 +21,8 @@ in your directory structure.
 To install, use miniconda3 or anaconda3, and run:
         conda env create -f pythia.yml
 
+        python setup.py build_ext --inplace
+        python setup.py install
 
 ### TO DO:
   - Generalize handling of priors
