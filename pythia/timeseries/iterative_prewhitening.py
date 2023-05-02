@@ -127,14 +127,6 @@ def map_optimise( x, y, yerr, t0, nu_init, nu_err, amp_init, amp_err,
         map_soln = pm.find_MAP(start=map_phamp, method='L-BFGS-B')
 
 
-    # plt.plot(x_, map_soln["sine_model_pred"],'-', color='darkorange')
-    #
-    # # plt.legend(fontsize=10)
-    # plt.xlim(x.min(), x.max())
-    # plt.xlabel("time [days]")
-    # plt.ylabel("Magnitude")
-    # plt.ylim(plt.ylim()[::-1])
-    # plt.show()
 
     if fit_offset:
         opt_ofst = np.zeros(dim)
@@ -287,16 +279,9 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
         noise_res = amp_res / snr_curve_res
 
         snr_at_nu = amp_ / noise_res[idx]
+        # print(amp_, noise_res[idx], snr_at_nu)
 
         stop_criteria.append(snr_at_nu)
-
-
-        # plt.plot(nu, amp, 'k-')
-        # plt.plot(nu_res, amp_res, '-', color='grey')
-        # plt.axhline(amp_,linestyle='--',color='red')
-        # plt.axvline(nu[idx],linestyle='--',color='red')
-        # plt.axvline(nu_res[idx],linestyle=':',color='blue')
-        # plt.show()
 
 
         nu = nu_res
