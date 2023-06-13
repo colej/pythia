@@ -40,7 +40,7 @@ ctypedef _HistType _HistType_t
 
 
 # python function to call the AoV routine
-def aov_cython(times, obs, sigma=None, fmin=None, fmax=None,
+def aov_periodogram(times, obs, sigma=None, fmin=None, fmax=None,
                oversample_factor=1., nbins=8):
 
   df = 1./(times.max() - times.min())

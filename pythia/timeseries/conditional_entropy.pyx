@@ -24,8 +24,8 @@ cdef index_sum(const DTYPE_t[::1] arr):
         result += arr[i]
     return result
 
-def cep_cython(times, obs, sigma=None, fmin=None, fmax=None,
-               oversample_factor=1., phase_bins=10, mag_bins=5):
+def ce_periodogram(times, obs, sigma=None, fmin=None, fmax=None,
+                   oversample_factor=1., phase_bins=10, mag_bins=5):
 
     df = 1./(times.max() - times.min())
 
@@ -60,8 +60,8 @@ def cep_cython(times, obs, sigma=None, fmin=None, fmax=None,
     periodogram = np.zeros(frequencies.shape, dtype=DTYPE, order='C')
 
     ## Call periodogram function
-    _conditional_entropy_periodogram(times, obs, frequencies, periodogram,
-                                     phase_bins, mag_bins)
+    _conditional_entropy_periodogram_cython(times, obs, frequencies, periodogram,
+                                            phase_bins, mag_bins)
 
     return frequencies.ravel(), periodogram.ravel()
 
@@ -74,12 +74,12 @@ def cep_cython(times, obs, sigma=None, fmin=None, fmax=None,
 @cython.cdivision(True)
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef _conditional_entropy_periodogram(const DTYPE_t[::1] times,
-                                      const DTYPE_t[::1] obs,
-                                      const DTYPE_t[::1] frequencies,
-                                      DTYPE_t[::1] periodogram,
-                                      const ITYPE_t phase_bins,
-                                      const ITYPE_t mag_bins):
+cdef _conditional_entropy_periodogram_cython(const DTYPE_t[::1] times,
+                                             const DTYPE_t[::1] obs,
+                                             const DTYPE_t[::1] frequencies,
+                                             DTYPE_t[::1] periodogram,
+                                             const ITYPE_t phase_bins,
+                                             const ITYPE_t mag_bins):
     cdef int j = 0
     cdef int n_freqs = frequencies.shape[0]
 
