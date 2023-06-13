@@ -1,6 +1,6 @@
 import numpy as np
-from astropy.timeseries import LombScargle
 
+from astropy.timeseries import LombScargle
 
 def normalise_distribution(s1, times):
     s1_var = np.var(s1)
