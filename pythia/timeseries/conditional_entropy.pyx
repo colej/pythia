@@ -52,7 +52,6 @@ def ce_periodogram(times, obs, sigma=None, min=None, max=None, frequency=True,
     frequencies = 1./np.arange(min, max, dp/oversample_factor)
 
 
-  print('A0')
   if times.ndim != 1:
     raise ValueError('times must be 1-D')
   if obs.ndim != 1:
@@ -68,17 +67,14 @@ def ce_periodogram(times, obs, sigma=None, min=None, max=None, frequency=True,
   times       = np.asarray(times, dtype=DTYPE, order='C')
   sigmas      = np.asarray(sigma, dtype=DTYPE, order='C')
   frequencies = np.asarray(frequencies, dtype=DTYPE, order='C')
-  print('A')
 
   # Declare empty periodogram to be filled
   periodogram = np.zeros(frequencies.shape, dtype=DTYPE, order='C')
-  print('B')
 
   ## Call periodogram function
   _conditional_entropy_periodogram_cython(times, obs, frequencies, periodogram,
                                           phase_bins, mag_bins)
 
-  print(periodogram)
   return frequencies.ravel(), periodogram.ravel()
 
 
