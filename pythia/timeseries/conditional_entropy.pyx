@@ -24,21 +24,33 @@ cdef index_sum(const DTYPE_t[::1] arr):
         result += arr[i]
     return result
 
-def ce_periodogram(times, obs, sigma=None, fmin=None, fmax=None,
+def ce_periodogram(times, obs, sigma=None, min=None, max=None, frequency=True,
                    oversample_factor=1., phase_bins=10, mag_bins=5):
 
+
+  if sigma is None:
+    sigma = np.ones(len(obs))*np.std(obs)
+
+  if frequency:
     df = 1./(times.max() - times.min())
+    if min is None:
+      min = df * 2.
 
-    if sigma is None:
-      sigma = np.ones(len(obs))*np.std(obs)
+    if max is None:
+      max = 0.5/(np.min(np.diff(times)))
 
-    if fmin is None:
-      fmin = df * 2.
+    frequencies = np.arange(min, max, df/oversample_factor)
 
-    if fmax is None:
-      fmax = 0.5/(np.min(np.diff(times)))
+  else:
+    dp = 0.001
+    if min is None:
+      min = dp
 
-    frequencies = np.arange(fmin, fmax, df/oversample_factor)
+    if max is None:
+      max = 25.
+
+    frequencies = 1./np.arange(min, max, dp/oversample_factor)
+
 
     if times.ndim != 1:
       raise ValueError('times must be 1-D')
