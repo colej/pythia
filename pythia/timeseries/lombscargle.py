@@ -19,17 +19,17 @@ def normalise_power(s1, times):
     return s1
 
 
-def LS_periodogram(times, signal, dy=None, f0=None, fn=None,
+def LS_periodogram(times, obs, sigma=None, min=None, max=None,
                    oversample_factor=10.0, normalisation='amplitude'):
 
     """
-    Calculates the amplitude spectrum of a given signal
+    Calculates the amplitude spectrum of a given observational signal
 
     Parameters
     ----------
         t : `array`
             Time values
-        y : `array`
+        obs : `array`
             Flux or magnitude measurements
             This is not automatically mean-substracted!!!
         f0 : float (default None)
@@ -45,18 +45,18 @@ def LS_periodogram(times, signal, dy=None, f0=None, fn=None,
 
     df = 1.0 / (times.max() - times.min())
 
-    if f0 is None:
-        f0 = df
-    if fn is None:
-        fn = 0.5 / np.median(np.diff(times))  # *nyq_mult
+    if min is None:
+        min = df
+    if max is None:
+        max = 0.5 / np.median(np.diff(times))  # *nyq_mult
 
-    freq  = np.arange(f0, fn, df / oversample_factor)
-    ls_   = LombScargle(times, signal, dy=dy)
+    freq  = np.arange(min, max, df / oversample_factor)
+    ls_   = LombScargle(times, obs, dy=sigma)
     sc    = ls_.power(freq, method="fast", normalization="psd")
 
-    if dy is None:
-        dy = np.array([1.]) #np.ones_like(signal)
-    w     = (dy ** -2.0).sum()
+    if sigma is None:
+        sigma = np.array([1.]) #np.ones_like(signal)
+    w     = (sigma ** -2.0).sum()
     power = (1. * sc) / w
 
     ## Normalised to return desired output units
