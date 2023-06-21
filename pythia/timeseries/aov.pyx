@@ -40,21 +40,32 @@ ctypedef _HistType _HistType_t
 
 
 # python function to call the AoV routine
-def aov_periodogram(times, obs, sigma=None, fmin=None, fmax=None,
+def aov_periodogram(times, obs, sigma=None, min=None, max=None, frequency=True,
                oversample_factor=1., nbins=8):
 
-  df = 1./(times.max() - times.min())
 
   if sigma is None:
     sigma = np.ones(len(obs))*np.std(obs)
 
-  if fmin is None:
-    fmin = df * 2.
+  if frequency:
+    df = 1./(times.max() - times.min())
+    if min is None:
+      min = df * 2.
 
-  if fmax is None:
-    fmax = 0.5/(np.min(np.diff(times)))
+    if max is None:
+      max = 0.5/(np.min(np.diff(times)))
 
-  frequencies = np.arange(fmin, fmax, df/oversample_factor)
+    frequencies = np.arange(min, max, df/oversample_factor)
+
+  else:
+    dp = 0.001
+    if min is None:
+      min = dp
+
+    if max is None:
+      max = 25.
+
+    frequencies = 1./np.arange(min, max, dp/oversample_factor)
 
   if times.ndim != 1:
     raise ValueError('times or obs should be 1-D')
