@@ -9,6 +9,8 @@
 *.~
 *.png
 *.c
+*/*.out
+*/*.c
 
 __pycache__/
 timeseries/__pycache__/
