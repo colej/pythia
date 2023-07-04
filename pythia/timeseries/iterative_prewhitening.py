@@ -203,7 +203,7 @@ def get_snr(nu, amp, use_snr_window=True, snr_window=1., snr_range=[23.,24.]):
 
 
 def run_ipw(times, signal, yerr, maxiter=100, t0=None,
-        f0=None, fn=None, df=None, snr_stop_criteria=4., order_by_snr=False,
+        min=None, max=None, df=None, snr_stop_criteria=4., order_by_snr=False,
         use_snr_window=True, snr_window=1., snr_range=[23.,24.]):
 
     residuals = signal[:]
@@ -223,7 +223,7 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
 
     stopcrit = False
 
-    nu, amp = LS_periodogram( times, residuals, f0=f0, fn=fn,
+    nu, amp = LS_periodogram( times, residuals, min=min, max=max,
                               normalisation='amplitude')
 
     pbar = Bar('Running...', max=maxiter)
@@ -268,7 +268,7 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
         maxiter -= 1
         residuals = np.hstack(residuals_)
 
-        nu_res, amp_res = LS_periodogram( times, residuals, f0=f0, fn=fn,
+        nu_res, amp_res = LS_periodogram( times, residuals, min=min, max=max,
                                           normalisation='amplitude')
 
         snr_curve_res, noise_ = get_snr( nu_res, amp_res,
@@ -313,14 +313,13 @@ def run_ipw(times, signal, yerr, maxiter=100, t0=None,
                     amp_init=amplitudes, amp_err=amp_err,
                     fit_offset=True)
 
-
-    nu_final, amp_final = LS_periodogram( times, residuals_f, f0=f0, fn=fn,
+    nu_final, amp_final = LS_periodogram( times, residuals_f, min=min, max=max,
                                           normalisation='amplitude')
 
     snr_curve_final, noise_final = get_snr( nu_final, amp_final,
                                             use_snr_window=use_snr_window,
                                             snr_window=snr_window,
-                                            snr_range=[min(amp_f),max(amp_f)])
+                                            snr_range=snr_range)
     noise_f = amp_final / snr_curve_final
 
 
