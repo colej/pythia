@@ -8,6 +8,7 @@
 *.so
 *.~
 *.png
+*.c
 
 __pycache__/
 timeseries/__pycache__/
