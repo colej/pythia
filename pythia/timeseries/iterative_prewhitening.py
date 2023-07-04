@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from progress.bar import Bar
 from pythia.utils.resampling import run_mean_smooth
-from pythia.timeseries.periodograms import LS_periodogram
+from pythia.timeseries.lombscargle import LS_periodogram
 
 
 def get_correlation_factor(residus):
