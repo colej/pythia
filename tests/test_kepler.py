@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from pythia.timeseries.iterative_prewhitening import run_ipw
-from pythia.timeseries.periodograms_native import LS_periodogram
+from pythia.timeseries.lombscargle import LS_periodogram
 
 if __name__=="__main__":
 
   times,fluxes = np.loadtxt("./test_kepler_pulsator.txt",unpack=True)
-  nu, amp = LS_periodogram( times, fluxes-np.mean(fluxes), fn=6.5,
+  nu, amp = LS_periodogram( times, fluxes-np.mean(fluxes), max=6.5,
                             normalisation='amplitude')
 
   fig,ax = plt.subplots(1,1,figsize=(6.6957,6.6957))
@@ -23,7 +23,7 @@ if __name__=="__main__":
   frequencies, amplitudes, \
   phases, stop_criteria, \
   noise_curve = run_ipw( times,fluxes-np.mean(fluxes),
-                         yerr, t0=4953.53931246, fn=6.2,
+                         yerr, t0=4953.53931246, max=6.2,
                          maxiter=3)
 
 
@@ -32,7 +32,7 @@ if __name__=="__main__":
   fig,ax = plt.subplots(1,1,figsize=(6.6957,6.6957))
 
   print(' C + A*sin( 2*pi*f*(t-t0)+phi )')
-  nu_, amp_ = LS_periodogram( times, residuals, fn=6.5,
+  nu_, amp_ = LS_periodogram( times, residuals, max=6.5,
                             normalisation='amplitude')
 
   outstr = '{} -- C: {:.6f} -- A: {:.6f} -- f: {:.6f} -- phi: {:.6f} -- SNR: {:.6f}'
