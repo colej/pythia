@@ -30,7 +30,7 @@ setup(
     version='0.1.0',
     description='Time-series analysis tools for astronomical datasets.',
     author='Cole Johnston',
-    author_email='cole.johnston@ru.nl',
+    author_email='colej@mpa-garching.mpg.de',
     url='https://github.com/colej/pythia',
     packages=packages,
     install_requires=[
